@@ -8,14 +8,16 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-         <h4>jangan di refresh kalo belum selesai. ntar hilang . thx</h4>
-         <h4>kalo mau tambah tinggal klik tambah aja </h4>
-
+         <div class="warning"><h3>DIBACA DULU YA</h3>
+         <h4>1. jangan REFRESH/KELUAR kalo belum selesai . Ntar hilang</h4>
+         <h4>2. Kalo mau TAMBAH tinggal klik aja </h4>
+         <h4>3. Dibagian "NAMA BARANG" tulis lengkap kalo ada GRAMASI </h4>
+         </div>
   
  
-  <input type="text" id="sku" placeholder="Masukkan SKU ">
-  <input type="text" id="nama" placeholder="Masukkan Nama Barang">
-  <input type="text" id="harga" placeholder="Masukkan Harga (Rp)">
+  <input type="text" id="sku" placeholder=" SKU ">
+  <input type="text" id="nama" placeholder="Nama Barang & GRAMASI">
+  <input type="text" id="harga" placeholder="Harga (Rp)">
   <input type="number" id="qty" placeholder="Jumlah (Qty)" min="1">
   <button onclick="tambahItem()">Tambah </button>
   <button onclick="unduhPDF()">Download PDF</button>
@@ -35,7 +37,7 @@
   </table>
 
  
-  <h3>buat barcode </h3>
+  <h2>buat barcode </h2>
   <div id="preview"></div>
 
   <script>
@@ -210,5 +212,3 @@
   <h6>© by ditttttt</h6>
 </footer>
 </html>
-
-
