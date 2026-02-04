@@ -1,214 +1,248 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <title>buat barcode</title>
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-         <div class="warning"><h3>DIBACA DULU YA</h3>
-         <h4>1. jangan REFRESH/KELUAR kalo belum selesai . Ntar hilang</h4>
-         <h4>2. Kalo mau TAMBAH tinggal klik aja </h4>
-         <h4>3. Dibagian "NAMA BARANG" tulis lengkap kalo ada GRAMASI </h4>
-         </div>
-  
- 
-  <input type="text" id="sku" placeholder=" SKU ">
-  <input type="text" id="nama" placeholder="Nama Barang & GRAMASI">
-  <input type="text" id="harga" placeholder="Harga">
-  <input type="number" id="qty" placeholder="Jumlah (Qty)" min="1">
-  <button onclick="tambahItem()">Tambah </button>
-  <button onclick="unduhPDF()">Download PDF</button>
+  <head>
+    <meta charset="UTF-8" />
+    <title>barcode uyyy</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  </head>
+  <body>
+    <div class="kotakatas">
+      <h3>DIBACA DULU YA</h3>
+      <p>1. jangan REFRESH/KELUAR kalo belum selesai . Ntar hilang</p>
+      <p>2. Kalo mau TAMBAH tinggal klik aja</p>
+      <p>3. Dibagian "NAMA BARANG" tulis lengkap kalo ada GRAMASI</p>
+    </div>
+
+    <div style="text-align: center">
+      <input type="number" id="sku" placeholder="SKU (Kode)" />
+      <input type="text" id="nama" placeholder="Nama Barang" />
+      <input type="number" id="harga" placeholder="Harga (Rp)" />
+
+      <span class="centang">
+        <input type="checkbox" id="cbExp" onchange="ExpDt()" checked />
+        <label for="cbExp" style="font-size: 13px; cursor: pointer"
+          >pake exp?</label>
+        <input type="date" id="exp" />
+      </span>
+
+      <input
+        type="number"
+        id="qty"
+        placeholder="Qty"
+        min="1"
+        value="1"
+        style="width: 60px"
+      />
+
+      <br />
+      <button onclick="tambahItem()">+ TAMBAH ITEM</button>
+      <button class="tmbl-download" onclick="unduhPDF()">DOWNLOAD PDF</button>
+    </div>
+
+    <table id="itemTable">
+      <thead>
+        <tr>
+          <th>SKU</th>
+          <th>Nama Barang</th>
+          <th>Harga</th>
+          <th>Exp Date</th>
+          <th>Jumlah</th>
+          <th>Hapus</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <h3>Preview Barcode:</h3>
+    <div id="preview"></div>
 
 
-  <table id="itemTable">
-    <thead>
-      <tr>
-        <th>SKU</th>
-        <th>Nama Barang</th>
-        <th>Harga</th>
-        <th>Jumlah</th>
-        <th>Aksi</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+    <script>
+      let daftarBarang = [];
 
- 
-  <h2>buat barcode </h2>
-  <div id="preview"></div>
-
-  <script>
-    let daftarBarang = [];
-
-    const inputHarga = document.getElementById("harga");
-    inputHarga.addEventListener("input", function() {
-      let angka = this.value.replace(/\D/g, '');
-      this.value = angka.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    });
-
-
-    function tambahItem() {
-      const sku = document.getElementById("sku").value.trim();
-      const nama = document.getElementById("nama").value.trim();
-      const harga = document.getElementById("harga").value.trim();
-      const qty = parseInt(document.getElementById("qty").value);
-
-      if (!sku || !nama || !harga || !qty) {
-        alert("lengkapin dulu gaesss");
-        return;
+      function ExpDt() {
+        const isChecked = document.getElementById("cbExp").checked;
+        const inputExp = document.getElementById("exp");
+        inputExp.disabled = !isChecked;
+        if (!isChecked) inputExp.value = "";
       }
 
-      daftarBarang.push({ sku, nama, harga, qty });
-      tampilkanTabel();
-      tampilkanPratinjau();
+      document.getElementById("harga").addEventListener("input", function () {
+        let angka = this.value.replace(/\D/g, "");
+        this.value = angka.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      });
 
- 
-      document.getElementById("sku").value = "";
-      document.getElementById("nama").value = "";
-      document.getElementById("harga").value = "";
-      document.getElementById("qty").value = "";
-    }
+      function formatTanggal(tanggal) {
+        if (!tanggal) return "";
+        const [tahun, bulan, hari] = tanggal.split("-");
+        return `${hari}/${bulan}/${tahun}`;
+      }
 
+      function tambahItem() {
+        const sku = document.getElementById("sku").value.trim();
+        const nama = document.getElementById("nama").value.trim();
+        const harga = document.getElementById("harga").value.trim();
+        const qty = parseInt(document.getElementById("qty").value);
+        const pakaiExp = document.getElementById("cbExp").checked;
+        let exp = document.getElementById("exp").value;
 
-    function hapusItem(index) {
-      daftarBarang.splice(index, 1);
-      tampilkanTabel();
-      tampilkanPratinjau();
-    }
+        if (!sku || !nama || !harga || !qty || (pakaiExp && !exp)) {
+          alert("Lengkapin dulu gaesss");
+          return;
+        }
 
+        daftarBarang.push({ sku, nama, harga, exp: pakaiExp ? exp : "", qty });
+        Tabel();
+        Pratinjau();
 
-    function tampilkanTabel() {
-      const tbody = document.querySelector("#itemTable tbody");
-      tbody.innerHTML = "";
+        document.getElementById("sku").value = "";
+        document.getElementById("nama").value = "";
+        document.getElementById("harga").value = "";
+      }
 
-      daftarBarang.forEach((item, index) => {
-        tbody.innerHTML += `
+      function hapusItem(index) {
+        daftarBarang.splice(index, 1);
+        Tabel();
+        Pratinjau();
+      }
+
+      function Tabel() {
+        const tbody = document.querySelector("#itemTable tbody");
+        tbody.innerHTML = "";
+        daftarBarang.forEach((item, index) => {
+          tbody.innerHTML += `
           <tr>
             <td>${item.sku}</td>
-            <td>${item.nama}</td>
-            <td>Rp ${item.harga}</td>
+            <td>${item.nama.toUpperCase()}</td>
+            <td>Rp. ${item.harga}</td>
+            <td>${item.exp ? formatTanggal(item.exp) : "-"}</td>
             <td>${item.qty}</td>
-            <td><button onclick="hapusItem(${index})">Hapus</button></td>
-          </tr>
-        `;
-      });
-    }
-
-
-    function buatBarcodeBase64(teks) {
-      return new Promise((resolve) => {
-        const kanvas = document.createElement("canvas");
-        JsBarcode(kanvas, teks, {
-          format: "CODE128",
-          displayValue: false,
-          lineColor: "#000",
-          width: 1.6,
-          height: 60,
-          margin: 0
+            <td><button onclick="hapusItem(${index})" style="padding:4px 8px; font-size:11px;">Hapus</button></td>
+          </tr>`;
         });
-        resolve(kanvas.toDataURL("image/png"));
-      });
-    }
-
-    async function tampilkanPratinjau() {
-      const preview = document.getElementById("preview");
-      preview.innerHTML = "";
-
-      for (let item of daftarBarang) {
-        const barcodeImg = await buatBarcodeBase64(item.sku);
-
-        for (let i = 0; i < item.qty; i++) {
-          const kotak = document.createElement("div");
-          kotak.className = "preview-box";
-
-          const nama = document.createElement("div");
-          nama.className = "nama";
-          nama.textContent = item.nama;
-
-          const harga = document.createElement("div");
-          harga.className = "harga";
-          harga.textContent = "Rp " + item.harga;
-
-          const img = document.createElement("img");
-          img.src = barcodeImg;
-
-          const sku = document.createElement("div");
-          sku.className = "sku";
-          sku.textContent = item.sku;
-
-          kotak.appendChild(nama);
-          kotak.appendChild(harga);
-          kotak.appendChild(img);
-          kotak.appendChild(sku);
-
-          preview.appendChild(kotak);
-        }
-      }
-    }
-// akhirnya bisa pdf juga wkwk
-    async function unduhPDF() {
-      if (daftarBarang.length === 0) {
-        alert("Belum ada barang yang ditambahkan!");
-        return;
       }
 
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF("p", "mm", "a4");
+      function buatBarcode(teks) {
+        return new Promise((resolve) => {
+          const kanvas = document.createElement("canvas");
+          JsBarcode(kanvas, teks, {
+            format: "CODE128",
+            displayValue: false,
+            lineColor: "#000",
+            width: 2,
+            height: 50,
+            margin: 0,
+          });
+          resolve(kanvas.toDataURL("image/png"));
+        });
+      }
 
-      const kolom = 5;
-      const baris = 9;
-      const lebarSel = 38;
-      const tinggiSel = 28;
-      const mulaiX = 10;
-      const mulaiY = 10;
-      let x = mulaiX, y = mulaiY, c = 0, r = 0;
+      async function Pratinjau() {
+        const preview = document.getElementById("preview");
+        preview.innerHTML = "";
 
-      for (let item of daftarBarang) {
-        const barcodeImg = await buatBarcodeBase64(item.sku);
-        const barcodeW = 32;
-        const barcodeH = 14;
+        for (let item of daftarBarang) {
+          const barcodeImg = await buatBarcode(item.sku);
+          let fontSizePreview = item.nama.length > 20 ? "9px" : "11px";
 
-        for (let i = 0; i < item.qty; i++) {
-          pdf.setLineWidth(0.2);
-          pdf.rect(x, y, lebarSel, tinggiSel);
-
-          let textY = y + 4;
-          pdf.setFontSize(7);
-          pdf.text(item.nama, x + lebarSel / 2, textY, { align: "center" });
-
-          textY += 3;
-          pdf.text("Rp " + item.harga, x + lebarSel / 2, textY, { align: "center" });
-
-          pdf.addImage(barcodeImg, "PNG", x + (lebarSel - barcodeW) / 2, y + 8, barcodeW, barcodeH);
-          pdf.text(item.sku, x + lebarSel / 2, y + 25, { align: "center" });
-
-          c++;
-          x += lebarSel;
-
-          if (c >= kolom) {
-            c = 0;
-            x = mulaiX;
-            r++;
-            y += tinggiSel;
-          }
-
-          if (r >= baris) {
-            pdf.addPage();
-            x = mulaiX;
-            y = mulaiY;
-            r = 0;
+          for (let i = 0; i < item.qty; i++) {
+            const kotak = document.createElement("div");
+            kotak.className = "preview-box";
+            kotak.innerHTML = `
+            <div class="nama" style="font-size: ${fontSizePreview}">${item.nama}</div>
+            <div class="harga">Rp. ${item.harga},-</div>
+            <img src="${barcodeImg}">
+            <div class="sku">${item.sku}</div>
+            ${item.exp ? `<div class="exp">Exp: ${formatTanggal(item.exp)}</div>` : ""}
+          `;
+            preview.appendChild(kotak);
           }
         }
       }
 
-      pdf.save("barcode-barang-nih.pdf");
-    }
-  </script>
-</body>
-<footer>
-  <h6>© by ditttttt</h6>
-</footer>
+      async function unduhPDF() {
+        if (daftarBarang.length === 0) return;
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF("p", "mm", "a4");
+
+        const KOLOM = 4;
+        const BARIS = 9;
+        const LEBAR_SEL = 48;
+        const TINGGI_SEL = 30;
+        const GAP_X = 2;
+        const GAP_Y = 2;
+        const BORDER_WIDTH = 0.5;
+        const MARGIN_X = 5;
+        const MARGIN_Y = 5;
+
+        let x = MARGIN_X;
+        let y = MARGIN_Y;
+        let c = 0,
+          r = 0;
+
+        for (let item of daftarBarang) {
+          const barcodeImg = await buatBarcode(item.sku);
+          for (let i = 0; i < item.qty; i++) {
+            pdf.setLineWidth(BORDER_WIDTH);
+            pdf.rect(x, y, LEBAR_SEL, TINGGI_SEL);
+
+            //Nama Barang
+            let fontSize = 8;
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(fontSize);
+            while (
+              pdf.getTextWidth(item.nama.toUpperCase()) > LEBAR_SEL - 2 &&
+              fontSize > 4
+            ) {
+              fontSize -= 0.5;
+              pdf.setFontSize(fontSize);
+            }
+            pdf.text(item.nama.toUpperCase(), x + LEBAR_SEL / 2, y + 3, {
+              align: "center",
+            });
+
+            // Harga
+            pdf.setFontSize(7);
+            pdf.setFont("helvetica", "italic","bold");
+            pdf.text("Rp. " + item.harga + ",-", x + LEBAR_SEL / 2, y + 6, {
+              align: "center",
+            });
+
+            // Barcode
+            pdf.addImage(barcodeImg, "PNG", x + 5, y + 7, 38, 17);
+
+            // SKU
+            pdf.setFontSize(11);
+            pdf.setFont("helvetica", "normal");
+            pdf.text(item.sku, x + LEBAR_SEL / 2, y + 28, { align: "center" });
+
+            // Exp
+            if (item.exp) {
+              pdf.setFontSize(4.5);
+               pdf.setFont("helvetica", "bold");
+              pdf.text("EXP: " + formatTanggal(item.exp), x + 1, y + 29.5);
+            }
+
+            c++;
+            x += LEBAR_SEL + GAP_X;
+            if (c >= KOLOM) {
+              c = 0;
+              x = MARGIN_X;
+              r++;
+              y += TINGGI_SEL + GAP_Y;
+            }
+            if (r >= BARIS) {
+              pdf.addPage();
+              x = MARGIN_X;
+              y = MARGIN_Y;
+              r = 0;
+            }
+          }
+        }
+        pdf.save("barcode-uyy.pdf");
+      }
+    </script>
+  </body>
 </html>
