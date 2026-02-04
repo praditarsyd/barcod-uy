@@ -54,9 +54,15 @@ button:hover {
   background-color: #fb6f92;
   transform: scale(1.02);
 }
+#cbExp {
+  accent-color: #fb6f92; 
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
 
 .tmbl-download {
-  background-color: #333; /* Warna gelap untuk membedakan fungsi download */
+  background-color: #333; 
 }
 
 table {
@@ -111,9 +117,9 @@ tr:hover {
 }
 
 .preview-box {
-  border: 2px solid #000; /* Border tebal sesuai request awal */
+  border: 2px solid #000; 
   background-color: white;
-  width: 170px; /* Ukuran preview disesuaikan agar proporsional */
+  width: 170px; 
   height: 105px;
   padding: 5px;
   text-align: center;
