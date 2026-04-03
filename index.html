@@ -18,7 +18,7 @@
     <div style="text-align: center">
       <input type="number" id="sku" placeholder="SKU (barcode)" />
       <input type="text" id="nama" placeholder="Nama Barang & Gramasi"/>
-      <input type="number" id="harga" placeholder="Harga (Rp)" />
+      <input type="text" id="harga" placeholder="Harga (Rp)" inputmode="numeric" />
 
       <span class="centang">
         <input type="checkbox" id="cbExp" onchange="ExpDt()" checked />
@@ -70,9 +70,13 @@
       }
 
       document.getElementById("harga").addEventListener("input", function () {
-        let angka = this.value.replace(/\D/g, "");
-        this.value = angka.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-      });
+  let angka = this.value.replace(/[^0-9]/g, "");
+  if (!angka) {
+    this.value = "";
+    return;
+  }
+  this.value = angka.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+});
 
       function formatTanggal(tanggal) {
         if (!tanggal) return "";
